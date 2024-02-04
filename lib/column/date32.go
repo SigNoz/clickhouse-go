@@ -21,9 +21,10 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/ClickHouse/ch-go/proto"
 	"reflect"
 	"time"
+
+	"github.com/ClickHouse/ch-go/proto"
 )
 
 var (
