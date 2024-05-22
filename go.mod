@@ -16,7 +16,7 @@ require (
 	github.com/paulmach/orb v0.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.4.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.26.0
 	go.opentelemetry.io/otel/trace v1.22.0
 	golang.org/x/net v0.23.0
