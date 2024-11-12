@@ -155,6 +155,8 @@ func (t Type) Column(name string, tz *time.Location) (Interface, error) {
 		return (&LowCardinality{name: name}).parse(t, tz)
 	case strings.HasPrefix(string(t), "SimpleAggregateFunction"):
 		return (&SimpleAggregateFunction{name: name}).parse(t, tz)
+	case strings.HasPrefix(string(t), "AggregateFunction(quantileDD"), strings.HasPrefix(string(t), "AggregateFunction(quantilesDD"):
+		return &AggregateFunctionDD{name: name, typeName: string(t)}, nil
 	case strings.HasPrefix(string(t), "Enum8") || strings.HasPrefix(string(t), "Enum16"):
 		return Enum(t, name)
 	case strings.HasPrefix(string(t), "DateTime64"):
@@ -203,6 +205,7 @@ var (
 		scanTypeVariant = reflect.TypeOf(chcol.Variant{})
 		scanTypeDynamic = reflect.TypeOf(chcol.Dynamic{})
         scanTypeJSON    = reflect.TypeOf(chcol.JSON{})
+		scanTypeDD 		= reflect.TypeOf(proto.AggregateFunctionDD{})
 	)
 
 {{- range . }}
