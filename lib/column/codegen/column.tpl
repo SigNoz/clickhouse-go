@@ -122,11 +122,8 @@ func (t Type) Column(name string, tz *time.Location) (Interface, error) {
 		return &Point{name: name}, nil
 	case "String":
 		return &String{name: name, col: colStrProvider()}, nil
-<<<<<<< HEAD
     case "SharedVariant":
         return &SharedVariant{name: name}, nil
-=======
->>>>>>> 5431cf8 (Add support for AggregateFunction with func quantilesDD)
 	case "Object('json')":
 	    return &JSONObject{name: name, root: true, tz: tz}, nil
 	}
