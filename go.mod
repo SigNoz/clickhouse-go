@@ -81,4 +81,4 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20240318140521-94a12d6c2237 // indirect
 )
 
-replace github.com/ClickHouse/ch-go => github.com/SigNoz/ch-go v0.63.1-dd-sketch
+replace github.com/ClickHouse/ch-go => github.com/SigNoz/ch-go v0.66.0-dd-sketch
