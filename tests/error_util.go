@@ -18,44 +18,38 @@
 package tests
 
 import (
-	"context"
-	"github.com/stretchr/testify/require"
+	"errors"
 	"testing"
 
-	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInterval(t *testing.T) {
-	TestProtocols(t, func(t *testing.T, protocol clickhouse.Protocol) {
-		conn, err := GetNativeConnection(t, protocol, nil, nil, &clickhouse.Compression{
-			Method: clickhouse.CompressionLZ4,
-		})
-		ctx := context.Background()
-		require.NoError(t, err)
-		const query = `
-		SELECT
-			  INTERVAL 1 SECOND
-			, INTERVAL 4 SECOND
-			, INTERVAL 1 MINUTE
-			, INTERVAL 5 MINUTE
-		`
-		var (
-			col1 string
-			col2 string
-			col3 string
-			col4 string
-		)
-		err = conn.QueryRow(ctx, query).Scan(
-			&col1,
-			&col2,
-			&col3,
-			&col4,
-		)
-		require.NoError(t, err)
-		assert.Equal(t, "1 Second", col1)
-		assert.Equal(t, "4 Seconds", col2)
-		assert.Equal(t, "1 Minute", col3)
-		assert.Equal(t, "5 Minutes", col4)
-	})
+// AssertIsTimeoutError ensures that the error provided is a timeout error.
+// It recursively unwraps the provided error and ensures the core error
+// implements the Timeout() method and it returns true.
+// context deadline error, os deadline error and poll deadline error each
+// implement this and return true.
+func AssertIsTimeoutError(t *testing.T, err error) {
+	assert.True(t, isDeadlineExceededError(err), "error is not a timeout error: %#v", err)
+}
+
+type timeout interface {
+	Timeout() bool
+}
+
+func isDeadlineExceededError(err error) bool {
+	nerr, ok := unwrap(err).(timeout)
+	if !ok {
+		return false
+	}
+
+	return nerr.Timeout()
+}
+
+// unwrap recursively unwraps the error until it gets the core error
+func unwrap(err error) error {
+	if uerr := errors.Unwrap(err); uerr != nil {
+		return unwrap(uerr)
+	}
+	return err
 }

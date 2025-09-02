@@ -124,7 +124,7 @@ func ParseDSN(dsn string) (*Options, error) {
 
 type Dial func(ctx context.Context, addr string, opt *Options) (DialResult, error)
 type DialResult struct {
-	conn *connect
+	conn nativeTransport
 }
 
 type HTTPProxy func(*http.Request) (*url.URL, error)
@@ -162,7 +162,11 @@ type Options struct {
 	// Use this instead of Auth.Username and Auth.Password if you're using JWT auth.
 	GetJWT GetJWTFunc
 
-	scheme      string
+	scheme string
+
+	// ReadTimeout is the maximum duration the client will wait for ClickHouse
+	// to respond to a single Read call for bytes over the connection.
+	// Can be overridden with context.WithDeadline.
 	ReadTimeout time.Duration
 }
 

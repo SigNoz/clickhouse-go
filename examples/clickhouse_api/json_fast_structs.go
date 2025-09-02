@@ -57,7 +57,7 @@ func (p *FastProduct) SerializeClickHouseJSON() (*clickhouse.JSON, error) {
 
 // DeserializeClickHouseJSON implements clickhouse.JSONDeserializer for faster struct scanning
 func (p *FastProduct) DeserializeClickHouseJSON(obj *clickhouse.JSON) error {
-	p.ID, _ = clickhouse.ExtractJSONPathAs[clickhouse.Dynamic](obj, "id")
+	p.ID, _ = clickhouse.ExtractJSONPathAsDynamic(obj, "id")
 	p.Name, _ = clickhouse.ExtractJSONPathAs[string](obj, "name")
 	p.Tags, _ = clickhouse.ExtractJSONPathAs[[]string](obj, "tags")
 	p.Pricing.Price, _ = clickhouse.ExtractJSONPathAs[int64](obj, "pricing.price")
@@ -91,13 +91,14 @@ func JSONFastStructExample() error {
 	ctx := context.Background()
 
 	conn, err := GetNativeConnection(clickhouse.Settings{
-		"allow_experimental_json_type": true,
+		"allow_experimental_json_type":                                      true,
+		"output_format_native_use_flattened_dynamic_and_json_serialization": true,
 	}, nil, nil)
 	if err != nil {
 		return err
 	}
 
-	if !CheckMinServerVersion(conn, 24, 9, 0) {
+	if !CheckMinServerVersion(conn, 25, 6, 0) {
 		fmt.Print("unsupported clickhouse version for JSON type")
 		return nil
 	}

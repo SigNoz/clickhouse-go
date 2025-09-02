@@ -15,22 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-// license agreements. See the NOTICE file distributed with
-// this work for additional information regarding copyright
-// ownership. ClickHouse, Inc. licenses this file to you under
-// the Apache License, Version 2.0 (the "License"); you may
-// not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing,
-// software distributed under the License is distributed on an
-// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-// KIND, either express or implied.  See the License for the
-// specific language governing permissions and limitations
-// under the License.
-
 package std
 
 import (
@@ -67,7 +51,7 @@ func TestTuple(t *testing.T) {
 		return
 	}
 	const ddl = `
-		CREATE TABLE test_tuple (
+		CREATE TABLE std_test_tuple (
 			  Col1 Tuple(String, Int64)
 			, Col2 Tuple(String, Int8, DateTime('Europe/Lisbon'))
 			, Col3 Tuple(name1 DateTime('Europe/Lisbon'), name2 FixedString(2), name3 Map(String, String))
@@ -78,13 +62,13 @@ func TestTuple(t *testing.T) {
 		) Engine MergeTree() ORDER BY tuple()
 		`
 	defer func() {
-		conn.Exec("DROP TABLE test_tuple")
+		conn.Exec("DROP TABLE std_test_tuple")
 	}()
 	_, err = conn.Exec(ddl)
 	require.NoError(t, err)
 	scope, err := conn.Begin()
 	require.NoError(t, err)
-	batch, err := scope.Prepare("INSERT INTO test_tuple")
+	batch, err := scope.Prepare("INSERT INTO std_test_tuple")
 	require.NoError(t, err)
 	var (
 		col1Data = []any{"A", int64(42)}
@@ -125,7 +109,7 @@ func TestTuple(t *testing.T) {
 		col6 any
 		col7 any
 	)
-	require.NoError(t, conn.QueryRow("SELECT * FROM test_tuple").Scan(&col1, &col2, &col3, &col4, &col5, &col6, &col7))
+	require.NoError(t, conn.QueryRow("SELECT * FROM std_test_tuple").Scan(&col1, &col2, &col3, &col4, &col5, &col6, &col7))
 	assert.NoError(t, err)
 	assert.Equal(t, col1Data, col1)
 	assert.Equal(t, col2Data, col2)

@@ -19,12 +19,10 @@ package clickhouse
 
 import (
 	"context"
-	"time"
-
 	"github.com/ClickHouse/clickhouse-go/v2/lib/proto"
 )
 
-func (c *connect) query(ctx context.Context, release func(*connect, error), query string, args ...any) (*rows, error) {
+func (c *connect) query(ctx context.Context, release nativeTransportRelease, query string, args ...any) (*rows, error) {
 	var (
 		options                    = queryOptions(ctx)
 		onProcess                  = options.onProcess()
@@ -36,15 +34,6 @@ func (c *connect) query(ctx context.Context, release func(*connect, error), quer
 		c.debugf("[bindQuery] error: %v", err)
 		release(c, err)
 		return nil, err
-	}
-
-	// set a read deadline - alternative to context.Read operation will fail if no data is received after deadline.
-	c.conn.SetReadDeadline(time.Now().Add(c.readTimeout))
-	defer c.conn.SetReadDeadline(time.Time{})
-	// context level deadlines override any read deadline
-	if deadline, ok := ctx.Deadline(); ok {
-		c.conn.SetDeadline(deadline)
-		defer c.conn.SetDeadline(time.Time{})
 	}
 
 	if err = c.sendQuery(body, &options); err != nil {
@@ -92,7 +81,7 @@ func (c *connect) query(ctx context.Context, release func(*connect, error), quer
 	}, nil
 }
 
-func (c *connect) queryRow(ctx context.Context, release func(*connect, error), query string, args ...any) *row {
+func (c *connect) queryRow(ctx context.Context, release nativeTransportRelease, query string, args ...any) *row {
 	rows, err := c.query(ctx, release, query, args...)
 	if err != nil {
 		return &row{
