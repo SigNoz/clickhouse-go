@@ -24,16 +24,17 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"github.com/ClickHouse/ch-go/proto"
-	"github.com/ClickHouse/clickhouse-go/v2/lib/chcol"
-	"github.com/google/uuid"
-	"github.com/paulmach/orb"
-	"github.com/shopspring/decimal"
 	"math/big"
 	"net"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/ClickHouse/ch-go/proto"
+	"github.com/ClickHouse/clickhouse-go/v2/lib/chcol"
+	"github.com/google/uuid"
+	"github.com/paulmach/orb"
+	"github.com/shopspring/decimal"
 )
 
 func (t Type) Column(name string, sc *ServerContext) (Interface, error) {
@@ -171,6 +172,8 @@ func (t Type) Column(name string, sc *ServerContext) (Interface, error) {
 		return (&LowCardinality{name: name}).parse(t, sc)
 	case strings.HasPrefix(string(t), "SimpleAggregateFunction"):
 		return (&SimpleAggregateFunction{name: name}).parse(t, sc)
+	case strings.HasPrefix(string(t), "AggregateFunction(quantileDD"), strings.HasPrefix(string(t), "AggregateFunction(quantilesDD"):
+		return &AggregateFunctionDD{name: name, typeName: string(t)}, nil
 	case strings.HasPrefix(string(t), "Enum8") || strings.HasPrefix(string(t), "Enum16"):
 		return Enum(t, name)
 	case strings.HasPrefix(string(t), "DateTime64"):
@@ -268,6 +271,7 @@ var (
 	scanTypeDynamic      = reflect.TypeOf(chcol.Dynamic{})
 	scanTypeJSON         = reflect.TypeOf(chcol.JSON{})
 	scanTypeJSONString   = reflect.TypeOf("")
+	scanTypeDD           = reflect.TypeOf(proto.AggregateFunctionDD{})
 )
 
 func (col *Float32) Name() string {
