@@ -77,4 +77,4 @@ require (
 	golang.org/x/sys v0.34.0 // indirect
 )
 
-replace github.com/ClickHouse/ch-go => github.com/SigNoz/ch-go v0.66.0-dd-sketch
+replace github.com/ClickHouse/ch-go => github.com/SigNoz/ch-go v0.67.0-dd-sketch
