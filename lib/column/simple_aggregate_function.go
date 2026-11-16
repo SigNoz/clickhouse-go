@@ -18,6 +18,8 @@
 package column
 
 import (
+	"fmt"
+
 	"github.com/ClickHouse/ch-go/proto"
 	"reflect"
 	"strings"
@@ -76,4 +78,27 @@ func (col *SimpleAggregateFunction) Encode(buffer *proto.Buffer) {
 	col.base.Encode(buffer)
 }
 
-var _ Interface = (*SimpleAggregateFunction)(nil)
+func (col *SimpleAggregateFunction) ReadStatePrefix(reader *proto.Reader) error {
+	if serialize, ok := col.base.(CustomSerialization); ok {
+		if err := serialize.ReadStatePrefix(reader); err != nil {
+			return fmt.Errorf("failed to read prefix for SimpleAggregateFunction base type %s: %w", col.base.Type(), err)
+		}
+	}
+
+	return nil
+}
+
+func (col *SimpleAggregateFunction) WriteStatePrefix(buffer *proto.Buffer) error {
+	if serialize, ok := col.base.(CustomSerialization); ok {
+		if err := serialize.WriteStatePrefix(buffer); err != nil {
+			return fmt.Errorf("failed to write prefix for SimpleAggregateFunction base type %s: %w", col.base.Type(), err)
+		}
+	}
+
+	return nil
+}
+
+var (
+	_ Interface           = (*SimpleAggregateFunction)(nil)
+	_ CustomSerialization = (*SimpleAggregateFunction)(nil)
+)
